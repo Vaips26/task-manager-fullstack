@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: gestor-postgres
+    environment:
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: gestor
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gestor-network
+
+  backend:
+    build: ./backend
+    container_name: gestor-backend
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: gestor
+      DB_USER: postgres
+      DB_PASSWORD: password123
+      JWT_SECRET: clave_super_secreta_cambiame_en_produccion
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gestor-network
+
+  frontend:
+    build: ./frontend
+    container_name: gestor-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - gestor-network
+
+volumes:
+  postgres_data:
+
+networks:
+  gestor-network:
+    driver: bridge

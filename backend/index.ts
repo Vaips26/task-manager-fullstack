@@ -1,0 +1,7 @@
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=gestor
+DB_USER=postgres
+DB_PASSWORD=password123
+JWT_SECRET=clave_super_secreta_cambiame_en_produccion
+PORT=3000
